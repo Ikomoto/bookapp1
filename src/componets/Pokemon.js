@@ -1,89 +1,66 @@
 
 import React, { useEffect, useState } from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import PokemonDetail from "./PokemonDetail";
+import { Link } from "react-router-dom";
 
-const PokemonURL = "https://pokeapi.co/api/v2/pokemon";
+/*
 
-
-
-
-const getAllPokemon = (url) => {
-    return new Promise((resolve, reject) => {
-        fetch(url)
-            .then((res) => res.json())
-            .then((data) => resolve(data));
-    });
-};
-
-
-const searchPokemon = (JaName, pokeData) => {
-        const result =pokeData.find(p => p.ja == JaName);
-        return result ? result.en : null;
-};
-
-const fetchJapaneseNames = async () => {
+const FetchJapaneseNames = async () => {
     const results =[];
-    const [jaName, setJaName] = useState([])
-
     for(let id=1; id<= 151; id++){
         const res = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${id}`);
         const data = await res.json();
-        
         const jaNameData = data.names.find(n => n.language.name === "ja");
-        //console.log(jaNameData);
+        const enNameData = data.names.find(n => n.language.name === "en");
         //const jaName = jaNameData.name;
-        setJaName(jaNameData.name);
-        //console.log(jaName);
+        //console.log(enNameData);
+        results.push({
+            id: id,
+            jaName: jaNameData?.name || "不明",
+            enName: enNameData?.name|| "不明"
+        });
     }
-}
+    console.log(results);
+    return results;
+};
+*/
 
-function Pokemon(){
-    const initialURL = "https://pokeapi.co/api/v2/pokemon";
-    const initialURL2 = "https://pokeapi.co/api/v2/pokemon-species/1"
-    //const [pokeData, setNameList] = useState([]);
-    const [jaName, setJaName] = useState([]);
-
-    const fetchJapaneseNames = async () => {
-        for(let id=1; id<= 151; id++){
-            const res = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${id}`);
-            const data = await res.json();
-            
-            const jaNameData = data.names.find(n => n.language.name === "ja");
-            setJaName([jaNameData.name]);
-        }
-    };
-
-    useEffect(() => {
-        fetchJapaneseNames();
-    }, []);
-
+function Pokemon({pokemonInfo}){
+    //const initialURL = "https://pokeapi.co/api/v2/pokemon";
+    //const initialURL2 = "https://pokeapi.co/api/v2/pokemon-species"
     /*
-    useEffect(() => {
-        const fetchPokemonData = async() => {
-        //すべてのポケモンデータを取得
-            let res = await getAllPokemon(initialURL2);
-            console.log(res);
-            setNameList(res.results.map((pokemon) => pokemon.name));
-            console.log(pokeData);
-        };
-        fetchPokemonData();
-    }, []);
+    const [pokeName_ja_en, setPokeName_ja_en] = useState([]);
 
-    /*
     useEffect(() => {
-        if(pokeData.length > 0){
-            const pokemon1 = searchPokemon("バタフリー", pokeData);
-            console.log(pokemon1);
+        const GetData = async () => {
+            const names = await FetchJapaneseNames();
+            setPokeName_ja_en(names);
         }
-    }, [pokeData]);
+        GetData();
+    },[]);
+
+    //console.log(pokeName_ja_en);
     */
 
     return (
         <div>
-            <h2>ポケモンの名前一覧</h2>
+            <h2>ポケモンの名前一覧2</h2>
             <ul>
-                {jaNames.map((name, index) => (
-                    <li key={index}>{name} </li>
-                ))}  
+                {pokemonInfo.map((pokemon) => (
+                    <li key={pokemon.id}>
+                        <Link to={`/pokemon/${pokemon.id}`}>
+                            {pokemon.id}: {pokemon.jaName}: {pokemon.enName}
+                        </Link>
+                    </li>
+                ))}
+            </ul>
+            <ul>
+                {pokemonInfo.map((pokemon) => (
+                    <li key={pokemon.id}>
+                        {pokemon.id}: {pokemon.jaName}: {pokemon.enName}
+                    </li>
+                ))}
             </ul>
         </div>
     );
