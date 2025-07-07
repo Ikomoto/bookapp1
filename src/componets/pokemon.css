@@ -1,0 +1,11 @@
+.Pokemon {
+    text-align: center;
+    width: 100%;
+    height: 100vh;
+}
+
+.pokemonCardContainer{
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+
+}
