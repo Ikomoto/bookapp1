@@ -6,7 +6,37 @@ import { Link } from "react-router-dom";
 import Card from "./Cards/Card.js"
 import './pokemon.css';
 
-function Pokemon({pokemonList, loading}){
+function Pokemon({pokemonList, pokemonJaList, loading}){
+    const [pokemonCardInfo, setPokemonCardInfo] = useState([]);
+    const pokemonJaDict = [];
+
+    //console.log(pokemonJaList);
+
+
+
+    useEffect(() => {
+        const CombineData = async () => {
+            console.log("useEffect 実行された！");
+            pokemonJaList.forEach((ja) => {
+                const jaNameEntry = ja.names.find(n => n.language.name === "ja");
+                pokemonJaDict[ja.id] = jaNameEntry ? jaNameEntry.name : '不明';
+            });
+            console.log(pokemonJaDict);
+
+            const CardInfo = pokemonList.map((pokemon) => {
+                return{
+                    id: pokemon.id,
+                    imageUrl: pokemon.sprites.front_default,
+                    jaName: pokemonJaDict[pokemon.id]
+                }
+            });
+            //console.log(CardInfo);
+            setPokemonCardInfo(CardInfo);
+        }
+        CombineData();
+    },[pokemonJaList]);
+    
+    console.log(pokemonCardInfo);
 
     return (
         <div className="App">
@@ -17,7 +47,7 @@ function Pokemon({pokemonList, loading}){
                 <h2>ポケモンの名前一覧</h2>
                 
                 <div className="pokemonCardContainer">
-                    {pokemonList.map((pokemon, i) => {
+                    {pokemonCardInfo.map((pokemon, i) => {
                         return <Card key={i} pokemon={pokemon}/>;
                     })}
                 </div>

@@ -1,0 +1,78 @@
+.card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 16px;
+    width: 100%;
+    max-width: 220px;
+    text-align: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.card-img img {
+    width: 96px;
+    height: 96px;
+}
+
+.cardName {
+    font-size: 1.1rem;
+    font-weight: bold;
+    text-transform: capitalize;
+    margin: 10px 0;
+}
+
+.card-types {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 8px 0;
+}
+
+.type {
+    padding: 4px 8px;
+    border-radius: 12px;
+    color: white;
+    font-size: 0.85rem;
+    text-transform: capitalize;
+}
+
+/* タイプ別カラー（必要に応じて追加） */
+.type.fire {
+    background-color: #f08030;
+}
+
+.type.water {
+    background-color: #6890f0;
+}
+
+.type.grass {
+    background-color: #78c850;
+}
+
+.type.poison {
+    background-color: #a040a0;
+}
+
+.type.flying {
+    background-color: #a890f0;
+}
+
+.type.bug {
+    background-color: #a8b820;
+}
+
+/* その他の情報 */
+.card-info {
+    font-size: 0.9rem;
+    margin-top: 10px;
+    line-height: 1.4;
+}

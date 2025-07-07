@@ -21,9 +21,7 @@ function PokemonDetail({pokemonInfo}) {
         }; 
         fetchData();
     },[id]);
-
-    console.log(resultPokemon);
-
+    
     if(!resultPokemon){
         return <p> 読み込み中...</p>
     }
