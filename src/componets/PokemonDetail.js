@@ -1,5 +1,6 @@
 import { data, useParams } from "react-router-dom";
 import React, {useEffect, useState} from "react";
+import PokemonDetailCard from "./Cards/PokemonDetailCard";
 
 
 const searchPokemon = async (pokemonID) => {
@@ -9,10 +10,19 @@ const searchPokemon = async (pokemonID) => {
     return data;
 }
 
-function PokemonDetail({pokemonInfo}) {
+function PokemonDetail({detailDataList, pokemonInfo}) {
     const { id } = useParams();
     const [resultPokemon, setResultPokemon] = useState([]);
 
+    useEffect(() => {
+        if(detailDataList.length > 0){
+            const found = detailDataList.find((p) => p.id === Number(id));
+            setResultPokemon(found);
+        }
+    }, [id, detailDataList]);
+
+
+    /*
     useEffect(() => {
         const fetchData = async () => {
             const data = await searchPokemon(id);
@@ -21,18 +31,14 @@ function PokemonDetail({pokemonInfo}) {
         }; 
         fetchData();
     },[id]);
-    
+    */
     if(!resultPokemon){
         return <p> 読み込み中...</p>
     }
 
     return (
     <div>
-        <h2>{resultPokemon.name}</h2>
-
-        <p>図鑑番号: {resultPokemon.id}</p>
-        <img src={resultPokemon.sprites?.front_default} alt="resultPokemon.name" />
-        {/* 画像やタイプなどがある場合はここに追加 */}
+        <PokemonDetailCard pokemon={resultPokemon} />
     </div>
     );
 }

@@ -129,12 +129,12 @@ function App() {
 
     //https://pokeapi.co/api/v2/pokemon-species/の日本語のデータを持つ
     const [pokemonDetailJa, setPokemonDetailJa] = useState([]);
-    const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true );
-    const flavor_text1 = [];
 
-    const PokemonURL = "https://pokeapi.co/api/v2/pokemon";
-    const SpeciesPokemonURL = "https://pokeapi.co/api/v2/pokemon-species";
+    const [detailDataList, setDetailDataList] = useState([]);
+
+    const PokemonURL = "https://pokeapi.co/api/v2/pokemon/?limit=151";
+    const SpeciesPokemonURL = "https://pokeapi.co/api/v2/pokemon-species/?limit=151";
 
     useEffect(() => {
         const GetData = async () => {
@@ -174,22 +174,21 @@ function App() {
                 console.log("useEffect 実行された！");
 
                 const height = pokemonDetail.map(t => t.height);
-                //console.log(height); 高さOK
-
                 const weight = pokemonDetail.map(t => t.weight);
-                //console.log(weight); 重さOK
+
+
+
+
+
 
                 //タイプ取得
                 const typeList = pokemonDetail.map((pokemon) =>
                     pokemon.types.map((t) => t.type.url)
                 );
-                
                 const structure = typeList.map(item => Array.isArray(item) ? item.length : 1);
                 const flattened = typeList.flatMap(item =>
                     Array.isArray(item) ? item : [item]
                 );
-                //console.log(flattened);
-
                 const typeDataList = await GetPokemonSpeciesDetailList2(flattened);
                 //console.log(typeDataList);
                 //console.log(Array.isArray(typeDataList));
@@ -197,11 +196,43 @@ function App() {
                     const jaNameEntry = typeData.names.find(n => n.language.name === "ja");
                     return jaNameEntry ? jaNameEntry.name : "不明";
                 });
-
-                const groupedJaNames = rebuild(flattenedJaNames, structure);
-                //console.log(groupedJaNames);
+                const groupedTypeJaNames = rebuild(flattenedJaNames, structure);
                 //日本語のタイプOK
                 
+                
+                //特性取得
+                const abilityListUrl = pokemonDetail.map((pokemon) => 
+                    pokemon.abilities.map((t) => t.ability.url)
+                );
+                //console.log(abilityListUrl);
+                const abiStructure = abilityListUrl.map(item => Array.isArray(item) ? item.length : 1);
+                const abiFlattened = abilityListUrl.flatMap(item =>
+                    Array.isArray(item) ? item : [item]
+                );
+                //console.log(abiFlattened);
+                const abilityList = await GetPokemonSpeciesDetailList2(abiFlattened);
+                //console.log(abilityList);
+                
+
+                const flattenedAbiJaNames = abilityList.map(typeData => {
+                    const jaAbiNameEntry = typeData.names.find(n => n.language.name === "ja");
+                    return jaAbiNameEntry ? jaAbiNameEntry.name : "不明";
+                });
+                const groupedAbiJaNames = rebuild(flattenedAbiJaNames, abiStructure);
+                //console.log(groupedAbiJaNames);
+
+                //
+                const flattenedAbiJaFlavor = abilityList.map(typeData => {
+                    const jaAbiNameEntry = typeData.flavor_text_entries.find(n => n.language.name === "ja" && n.version_group.name === "x-y");
+                    return jaAbiNameEntry ? jaAbiNameEntry.flavor_text : "不明";
+                });
+                const groupedAbiJaFlavor = rebuild(flattenedAbiJaFlavor, abiStructure);
+                //console.log(groupedAbiJaFlavor);
+
+
+
+
+
                 
                 const pokemonJaName = pokemonDetailJa.map((ja) => {
                     const jaNameEntry = ja.names.find(n => n.language.name === "ja");
@@ -220,12 +251,17 @@ function App() {
                     name: pokemonJaName[index],
                     types: flavor_text[index] || ["不明"]
                 }));
-                console.log(mergedJaData);
+                //console.log(mergedJaData);
+
+                //分類を取得
+                const genus = pokemonDetailJa.map((ja) => {
+                    const genusEntry = ja.genera.find(n => n.language.name === "ja");
+                    return genusEntry ? genusEntry.genus : "不明";
+                });
+                //console.log(genus);
+
+
                 
-
-
-
-
                 //ポケモンリストから種族値を取得
                 const hp = pokemonDetail.map((pokemon) => {
                     const hpStat = pokemon.stats.find(n => n.stat.name === "hp");
@@ -249,35 +285,27 @@ function App() {
                         const found = pokemon.stats.find(stat => stat.stat.name === statName);
                         stats[statName] = found ? found.base_stat : null;
                     });
-
-                    return {
-                        id: pokemon.id,
-                        name: pokemon.name,
-                        stats: stats
-                    };
+                    return stats;
                 });
-                console.log(statsList);
+                console.log(statsList)
 
-                    /*
-                stat {
-                    hp:
-                    attack:
-                    defense
-                    special-attack
-                    special-defense
-                    speed
-                }
-                */
 
-                const mergedData = pokemonDetail.map((pokemon, index) => ({
+
+                const pokemonDetailDataList = pokemonDetail.map((pokemon, index) => ({
                     id: pokemon.id,
+                    genus: genus[index],
                     name: pokemonJaName[index],
-                    types: groupedJaNames[index] || ["不明"],
+                    image: pokemon.sprites.front_default,
+                    types: groupedTypeJaNames[index] || ["不明"],
+                    abilityName: groupedAbiJaNames[index],
+                    abilityFlavor_text: groupedAbiJaFlavor[index],
                     height: pokemon.height,
                     weight: pokemon.weight,
-                    flavor_text: flavor_text[index]
+                    flavor_text: flavor_text[index],
+                    stats: statsList[index]
                 }));
-                console.log(mergedData);
+                setDetailDataList(pokemonDetailDataList);
+                console.log(pokemonDetailDataList);
                 
             }
         };
@@ -294,7 +322,7 @@ function App() {
             <Route path="/booklist" element={<BookList />}></Route>
             <Route path="/bookdetail" element={<BookDetail />}></Route>
             <Route path="/pokemon" element={<Pokemon />}></Route>
-            <Route path="/pokemon/:id" element={<PokemonDetail pokemonInfo={pokeName_ja_en}/>}></Route>
+            <Route path="/pokemon/:id" element={<PokemonDetail detailDataList={detailDataList} pokemonInfo={pokeName_ja_en}/>}></Route>
         </Routes>
         </Router>
     );
