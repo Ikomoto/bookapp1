@@ -49,7 +49,15 @@ const GetPokemonSpeciesDetailList = async (urlList) => {
     return pokemonJaData;
 };
 
-
+const GetPokemonSpeciesDetailList2 = async (urlList) => {
+    let pokemonJaData = await Promise.all(
+        urlList.map((pokemon) => {
+            let pokemonJaRecord = getPokemon(pokemon);
+            return pokemonJaRecord;
+        })
+    );
+    return pokemonJaData;
+};
 
 
 
@@ -91,6 +99,25 @@ const getPokemon = async(url) => {
     
 };
 
+//フラットにしたtypeをもとに戻してあげる関数
+const rebuild = (flatArray, structure) => {
+    const result = [];
+    let index = 0;
+
+    for (let size of structure) {
+        if (size === 1) {
+            result.push(flatArray[index]);
+        } else {
+            result.push(flatArray.slice(index, index + size));
+        }
+        index += size;
+    }
+
+  return result;
+};
+
+
+
 function App() {
 
     //id,日本語,英語の情報を持つ、検索時に使う変換表
@@ -102,7 +129,9 @@ function App() {
 
     //https://pokeapi.co/api/v2/pokemon-species/の日本語のデータを持つ
     const [pokemonDetailJa, setPokemonDetailJa] = useState([]);
+    const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true );
+    const flavor_text1 = [];
 
     const PokemonURL = "https://pokeapi.co/api/v2/pokemon";
     const SpeciesPokemonURL = "https://pokeapi.co/api/v2/pokemon-species";
@@ -122,6 +151,7 @@ function App() {
             //console.log(detail);
             setLoading(false);
             setPokemonDetail(detail);
+             console.log("pokemonDetail 実行された！");
         };
         GetPokemonListData();
     },[]);
@@ -131,11 +161,85 @@ function App() {
             const jaData = await GetPokemonSpeciesList(SpeciesPokemonURL);
             const jaDetail = await GetPokemonSpeciesDetailList(jaData.results);
             setPokemonDetailJa(jaDetail);
+             console.log("pokemonDetailJa 実行された！");
         };
         GetPokemonListDataJa();
     },[]);
 
     //console.log(pokemonDetailJa);
+
+    useEffect(() => {
+        const fetchDataAsync = async () => {
+            if(pokemonDetail.length > 0 && pokemonDetailJa.length >0){
+                console.log("useEffect 実行された！");
+
+                const height = pokemonDetail.map(t => t.height);
+                //console.log(height); 高さOK
+
+                const weight = pokemonDetail.map(t => t.weight);
+                //console.log(weight); 重さOK
+
+                //タイプ取得
+                const typeList = pokemonDetail.map((pokemon) =>
+                    pokemon.types.map((t) => t.type.url)
+                );
+                
+                const structure = typeList.map(item => Array.isArray(item) ? item.length : 1);
+                const flattened = typeList.flatMap(item =>
+                    Array.isArray(item) ? item : [item]
+                );
+                //console.log(flattened);
+
+                const typeDataList = await GetPokemonSpeciesDetailList2(flattened);
+                //console.log(typeDataList);
+                //console.log(Array.isArray(typeDataList));
+                const flattenedJaNames = typeDataList.map(typeData => {
+                    const jaNameEntry = typeData.names.find(n => n.language.name === "ja");
+                    return jaNameEntry ? jaNameEntry.name : "不明";
+                });
+
+                const groupedJaNames = rebuild(flattenedJaNames, structure);
+                //console.log(groupedJaNames);
+                //日本語のタイプOK
+               
+                
+                const pokemonJaName = pokemonDetailJa.map((ja) => {
+                    const jaNameEntry = ja.names.find(n => n.language.name === "ja");
+                    return jaNameEntry ? jaNameEntry.name : '不明';
+                });
+                //console.log(pokemonJaName);
+
+                const flavor_text = pokemonDetailJa.map(typeData => {
+                    const jaNameEntry = typeData.flavor_text_entries.find(n => n.language.name === "ja");
+                    return jaNameEntry ? jaNameEntry.flavor_text : "不明";
+                });
+                //console.log(flavor_text);
+
+                const mergedJaData = pokemonDetailJa.map((pokemon, index) => ({
+                    id: pokemon.id,
+                    name: pokemonJaName[index],
+                    types: flavor_text[index] || ["不明"]
+                }));
+                console.log(mergedJaData);
+                
+
+                const mergedData = pokemonDetail.map((pokemon, index) => ({
+                    id: pokemon.id,
+                    name: pokemonJaName[index],
+                    types: groupedJaNames[index] || ["不明"],
+                    height: pokemon.height,
+                    weight: pokemon.weight,
+                    flavor_text: flavor_text[index]
+                }));
+                console.log(mergedData);
+                 
+            }
+        };
+        fetchDataAsync();
+    },[pokemonDetail,pokemonDetailJa]);
+
+
+
 
     return (
         <Router>

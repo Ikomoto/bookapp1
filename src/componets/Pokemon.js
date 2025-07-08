@@ -9,19 +9,19 @@ import './pokemon.css';
 function Pokemon({pokemonList, pokemonJaList, loading}){
     const [pokemonCardInfo, setPokemonCardInfo] = useState([]);
     const pokemonJaDict = [];
+    const flavor_text = [];
+
 
     //console.log(pokemonJaList);
 
-
-
     useEffect(() => {
         const CombineData = async () => {
-            console.log("useEffect 実行された！");
+            
             pokemonJaList.forEach((ja) => {
                 const jaNameEntry = ja.names.find(n => n.language.name === "ja");
                 pokemonJaDict[ja.id] = jaNameEntry ? jaNameEntry.name : '不明';
             });
-            console.log(pokemonJaDict);
+            //console.log(pokemonJaDict);
 
             const CardInfo = pokemonList.map((pokemon) => {
                 return{
@@ -31,12 +31,27 @@ function Pokemon({pokemonList, pokemonJaList, loading}){
                 }
             });
             //console.log(CardInfo);
+
+            /*
+            //フレーバーテキスト抽出
+            pokemonJaList.forEach((entry) => {
+                const flavorEntry = entry.flavor_text_entries.find(
+                    (n) => 
+                        n.language.name === "ja" &&
+                        n.version.name === "x"
+                );
+                flavor_text[entry.id] = flavorEntry ? flavorEntry.flavor_text : "不明";
+                //const genusEntry = entry.genera.find((n) => n.language.name === "ja")
+                //console.log(flavorEntry);
+            });
+            console.log(flavor_text)
+            */
             setPokemonCardInfo(CardInfo);
         }
         CombineData();
     },[pokemonJaList]);
     
-    console.log(pokemonCardInfo);
+    //console.log(pokemonCardInfo);
 
     return (
         <div className="App">
