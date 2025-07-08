@@ -113,7 +113,7 @@ const rebuild = (flatArray, structure) => {
         index += size;
     }
 
-  return result;
+    return result;
 };
 
 
@@ -151,7 +151,7 @@ function App() {
             //console.log(detail);
             setLoading(false);
             setPokemonDetail(detail);
-             console.log("pokemonDetail 実行された！");
+            console.log("pokemonDetail 実行された！");
         };
         GetPokemonListData();
     },[]);
@@ -161,7 +161,7 @@ function App() {
             const jaData = await GetPokemonSpeciesList(SpeciesPokemonURL);
             const jaDetail = await GetPokemonSpeciesDetailList(jaData.results);
             setPokemonDetailJa(jaDetail);
-             console.log("pokemonDetailJa 実行された！");
+            console.log("pokemonDetailJa 実行された！");
         };
         GetPokemonListDataJa();
     },[]);
@@ -201,7 +201,7 @@ function App() {
                 const groupedJaNames = rebuild(flattenedJaNames, structure);
                 //console.log(groupedJaNames);
                 //日本語のタイプOK
-               
+                
                 
                 const pokemonJaName = pokemonDetailJa.map((ja) => {
                     const jaNameEntry = ja.names.find(n => n.language.name === "ja");
@@ -223,6 +223,52 @@ function App() {
                 console.log(mergedJaData);
                 
 
+
+
+
+                //ポケモンリストから種族値を取得
+                const hp = pokemonDetail.map((pokemon) => {
+                    const hpStat = pokemon.stats.find(n => n.stat.name === "hp");
+                    return hpStat ? hpStat.base_stat : null;
+                });
+                //console.log(hp);
+
+                //種族値を取り出すためのキー
+                const desiredOrder = [
+                        "hp",
+                        "attack",
+                        "defense",
+                        "special-attack",
+                        "special-defense",
+                        "speed"
+                    ];
+
+                const statsList = pokemonDetail.map((pokemon) => {
+                    const stats = {};
+                    desiredOrder.forEach((statName) => {
+                        const found = pokemon.stats.find(stat => stat.stat.name === statName);
+                        stats[statName] = found ? found.base_stat : null;
+                    });
+
+                    return {
+                        id: pokemon.id,
+                        name: pokemon.name,
+                        stats: stats
+                    };
+                });
+                console.log(statsList);
+
+                    /*
+                stat {
+                    hp:
+                    attack:
+                    defense
+                    special-attack
+                    special-defense
+                    speed
+                }
+                */
+
                 const mergedData = pokemonDetail.map((pokemon, index) => ({
                     id: pokemon.id,
                     name: pokemonJaName[index],
@@ -232,7 +278,7 @@ function App() {
                     flavor_text: flavor_text[index]
                 }));
                 console.log(mergedData);
-                 
+                
             }
         };
         fetchDataAsync();
