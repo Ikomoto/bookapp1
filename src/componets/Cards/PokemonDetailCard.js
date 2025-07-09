@@ -31,7 +31,7 @@ function PokemonDetailCard({ pokemon }) {
                     />
                     <div className="flex flex-col justify-center">
                         <h2 className="text-3xl font-bold">
-                            図鑑No.{pokemon.id.toString().padStart(3, "0")} {pokemon.name}
+                            No.{pokemon.id.toString().padStart(3, "0")} {pokemon.name}
                         </h2>
                     </div>
                 </div>
